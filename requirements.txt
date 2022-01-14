@@ -123,6 +123,7 @@ python-dateutil==2.8.1
 pytz==2021.1
 requests==2.26.0
 timeout-decorator==0.5.0
+rdflib==6.1.1
 
 # required by monitoring
 psutil==5.8.0
