@@ -83,7 +83,7 @@ class Command(BaseCommand):
         available_titles = [t for t in g.objects(scheme, DC.title) if isinstance(t, Literal)]
         thesaurus_title = value_for_language(available_titles, default_lang)
         description = g.value(scheme, DC.description, None, default=thesaurus_title)
-        date_issued = g.value(scheme, DCTERMS.issued, None)
+        date_issued = g.value(scheme, DCTERMS.issued, None, default="")
 
         print(f'Thesaurus "{thesaurus_title}", desc: {description} issued at {date_issued}')
 
@@ -129,9 +129,6 @@ class Command(BaseCommand):
 
             for _, pref_label in g.preferredLabel(concept):
                 lang = pref_label.language
-                # remove script code from lang if it exists
-                if "-" in lang:
-                    lang = lang.split("-")[0]
                 label = str(pref_label)
                 print(f'    Label {lang}: {label}')
 
