@@ -1,6 +1,7 @@
 #########################################################################
 #
-# Copyright (C) 2021 OSGeo
+# Copyright (C) 2020 OSGeo
+# Copyright (C) 2022 King's College London
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,6 +17,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 #########################################################################
+import sys
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
@@ -77,7 +79,7 @@ class Command(BaseCommand):
         self.dump_thesaurus(name, options.get('format'), options.get('lang'))
 
     def list_thesauri(self):
-        print('LISTING THESAURI')
+        self.stderr.write(self.style.SUCCESS('LISTING THESAURI'))
         max_id_len = len(max(Thesaurus.objects.values_list('identifier', flat=True), key=len))
 
         for t in Thesaurus.objects.order_by('order').all():
@@ -87,16 +89,16 @@ class Command(BaseCommand):
                 # DISABLED
                 # [0..n]
                 card = f'[{t.card_min}..{t.card_max if t.card_max!=-1 else "N"}]  '
-            print(f'id:{t.id:2} sort:{t.order:3} {card} name={t.identifier.ljust(max_id_len)} title="{t.title}" URI:{t.about}')
+            self.stdout.write(f'id:{t.id:2} sort:{t.order:3} {card} name={t.identifier.ljust(max_id_len)} title="{t.title}" URI:{t.about}\n')
 
-    def dump_thesaurus(self, name: str, format: str, default_lang: str):
+    def dump_thesaurus(self, name: str, fmt: str, default_lang: str):
 
         g = Graph()
         thesaurus = Thesaurus.objects.filter(identifier=name).get()
         scheme = URIRef(thesaurus.about)
         g.add((scheme, RDF.type, SKOS.ConceptScheme))
         g.add((scheme, DC.title, Literal(thesaurus.title, lang=default_lang)))
-        g.add((scheme, DC.description, Literal(thesaurus.description)))
+        g.add((scheme, DC.description, Literal(thesaurus.description, lang=default_lang)))
         g.add((scheme, DCTERMS.issued, Literal(thesaurus.date)))
 
         for title_label in ThesaurusLabel.objects.filter(thesaurus=thesaurus).all():
@@ -112,4 +114,4 @@ class Command(BaseCommand):
             for label in ThesaurusKeywordLabel.objects.filter(keyword=keyword).all():
                 g.add((concept, SKOS.prefLabel, Literal(label.label, lang = label.lang)))
 
-        print(g.serialize(format=format))
+        self.stdout.write(g.serialize(format=fmt))

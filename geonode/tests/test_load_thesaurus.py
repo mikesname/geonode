@@ -1,6 +1,7 @@
 #########################################################################
 #
 # Copyright (C) 2020 OSGeo
+# Copyright (C) 2022 King's College London
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

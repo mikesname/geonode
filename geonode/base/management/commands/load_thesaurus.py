@@ -1,6 +1,7 @@
 #########################################################################
 #
 # Copyright (C) 2016 OSGeo
+# Copyright (C) 2022 King's College London
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -85,7 +86,7 @@ class Command(BaseCommand):
         description = g.value(scheme, DC.description, None, default=thesaurus_title)
         date_issued = g.value(scheme, DCTERMS.issued, None, default="")
 
-        print(f'Thesaurus "{thesaurus_title}", desc: {description} issued at {date_issued}')
+        self.stderr.write(self.style.SUCCESS(f'Thesaurus "{thesaurus_title}", desc: {description} issued at {date_issued}'))
 
         thesaurus = Thesaurus()
         thesaurus.identifier = name
@@ -100,8 +101,8 @@ class Command(BaseCommand):
         for lang in available_titles:
             if lang.language is not None:
                 thesaurus_label = ThesaurusLabel()
-                thesaurus_label.lang = lang[0]
-                thesaurus_label.label = lang[1]
+                thesaurus_label.lang = lang.language
+                thesaurus_label.label = lang.value
                 thesaurus_label.thesaurus = thesaurus
 
                 if store:
@@ -117,7 +118,7 @@ class Command(BaseCommand):
                 available_labels = [t for t in g.objects(concept, SKOS.prefLabel) if isinstance(t, Literal)]
                 alt_label = value_for_language(available_labels, default_lang)
 
-            print(f'Concept {str(pref)}: {alt_label} ({about})')
+            self.stderr.write(self.style.SUCCESS(f'Concept {str(pref)}: {alt_label} ({about})'))
 
             tk = ThesaurusKeyword()
             tk.thesaurus = thesaurus
@@ -130,7 +131,7 @@ class Command(BaseCommand):
             for _, pref_label in g.preferredLabel(concept):
                 lang = pref_label.language
                 label = str(pref_label)
-                print(f'    Label {lang}: {label}')
+                self.stderr.write(self.style.SUCCESS(f'    Label {lang}: {label}'))
 
                 tkl = ThesaurusKeywordLabel()
                 tkl.keyword = tk
